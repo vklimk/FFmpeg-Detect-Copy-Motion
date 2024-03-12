@@ -27,6 +27,7 @@ out_delimiter = '' #e.g. '-' to make filename more readable
 #cmd window log
 print_scores = False #whether to print frame info (including scene scores)
 ffmpeg_loglevel = 31 #see https://ffmpeg.org/ffmpeg.html#Generic-options
+ffmpeg_stats = True #whether to print ffmpeg's progress report
 
 
 #advanced filter parameters
@@ -72,6 +73,13 @@ import glob
 import random
 import statistics		
 import time
+
+
+#prepare stats option for ffmpeg
+if ffmpeg_stats:
+	ffmpeg_print_stats = ' -stats'
+else:
+	ffmpeg_print_stats = ''
 
 
 #prepare crop filter for ffmpeg
@@ -121,7 +129,7 @@ for input_file in input_files:
 	temp_file = "temp-scenescores-" + str(randint) + ".txt"
 	if os.path.isfile(temp_file):
 		os.remove(temp_file)
-	command = "ffmpeg -loglevel "+str(ffmpeg_loglevel)+ " -i \""+input_file+"\" -vf select='not(mod(n\,"+str(step_len_f)+"))'"+vf_crop+",select='gte(scene,0)',metadata=print:file="+temp_file+" -an -f null -"
+	command = "ffmpeg -loglevel "+str(ffmpeg_loglevel)+ " -i \""+input_file+"\" -vf select='not(mod(n\,"+str(step_len_f)+"))'"+vf_crop+",select='gte(scene,0)',metadata=print:file="+temp_file+" -an -f null -"+ffmpeg_print_stats
 	print('Run command: ' + command)	
 	os.system(command)
 
