@@ -39,6 +39,14 @@ segments_to_start = 2 #this many segments in a row above threshold triggers moti
 segments_to_end = 10 #this many segments in a row below threshold triggers motion end
 
 
+#analyze specific area
+custom_detection_area = False #set to True if you want to analyze specific area of the video
+detection_area_w = 240 #area width, in pixels (for example: 240) or any allowed by ffmpeg crop filter expression (for example: "2/3*in_w")
+detection_area_h = 192 #area height
+detection_area_x = 1024 #the left edge of area
+detection_area_y = 880 #the top edge of area
+
+
 '''
 MIT License
 
@@ -64,6 +72,13 @@ import glob
 import random
 import statistics		
 import time
+
+
+#prepare crop filter for ffmpeg
+if custom_detection_area:
+	vf_crop = ',crop=out_w={}:out_h={}:x={}:y={}'.format(detection_area_w,detection_area_h,detection_area_x,detection_area_y)
+else:
+	vf_crop = ''
 
 
 #prepare random characters in output file name
@@ -106,7 +121,7 @@ for input_file in input_files:
 	temp_file = "temp-scenescores-" + str(randint) + ".txt"
 	if os.path.isfile(temp_file):
 		os.remove(temp_file)
-	command = "ffmpeg -loglevel "+str(ffmpeg_loglevel)+ " -i \""+input_file+"\" -vf select='not(mod(n\,"+str(step_len_f)+"))',select='gte(scene,0)',metadata=print:file="+temp_file+" -an -f null -"
+	command = "ffmpeg -loglevel "+str(ffmpeg_loglevel)+ " -i \""+input_file+"\" -vf select='not(mod(n\,"+str(step_len_f)+"))'"+vf_crop+",select='gte(scene,0)',metadata=print:file="+temp_file+" -an -f null -"
 	print('Run command: ' + command)	
 	os.system(command)
 
